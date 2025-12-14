@@ -23,13 +23,15 @@
       animation: fade .4s ease;
     }
 
+    /* ✅ ภาพไม่โดนครอป */
     img {
       max-width: 65vw;
       max-height: 65vh;
       margin-top: 30px;
       margin-bottom: -17px;
       border-radius: 18px;
-      object-fit: contain;
+      object-fit: contain; /* สำคัญ */
+      background: #000; /* กันขอบกินภาพ */
     }
 
     h1 {
@@ -56,6 +58,9 @@
   <p id="ig"></p>
 </div>
 
+<!-- 🔊 เสียงเอฟเฟกต์ -->
+<audio id="sound" src="pop.mp3" preload="auto"></audio>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -72,42 +77,36 @@
 
   const img = document.getElementById("img");
   const msg = document.getElementById("msg");
-  const ig = document.getElementById("ig");
+  const ig  = document.getElementById("ig");
   const box = document.getElementById("box");
+  const sound = document.getElementById("sound");
+
+  let lastImage = ""; // กันเสียงดังซ้ำ
 
   onValue(ref(db, "screen"), snap => {
-    const sound = document.getElementById("sound");
+    const d = snap.val();
+    if (!d) return;
 
-onValue(ref(db, "screen"), snap => {
-  const d = snap.val();
-  if (!d) return;
+    msg.innerText = d.message || "";
+    ig.innerText  = d.ig ? "IG: " + d.ig : "";
 
-  msgEl.innerText = d.message || "";
-  igEl.innerText = d.ig ? "IG: " + d.ig : "";
+    // ✅ ถ้ามีรูปใหม่
+    if (d.image && d.image !== lastImage) {
+      img.src = d.image;
+      img.style.display = "block";
 
-  if (d.image && imgEl.src !== d.image) {
-    imgEl.src = d.image;
-    imgEl.style.display = "block";
+      sound.currentTime = 0;
+      sound.play().catch(()=>{});
 
-    // เล่นเสียง
-    sound.currentTime = 0;
-    sound.play();
-  }
+      lastImage = d.image;
+    }
 
-  box.style.animation = "none";
-  box.offsetHeight;
-  box.style.animation = "fade .5s ease";
-});
+    // รีสตาร์ท animation
+    box.style.animation = "none";
+    box.offsetHeight;
+    box.style.animation = "fade .4s ease";
+  });
 </script>
 
 </body>
-  <audio id="sound" src="pop.mp3" preload="auto"></audio>
 </html>
-
-
-
-
-
-
-
-
