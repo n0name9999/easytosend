@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Test</title>
+</head>
+<body>
+
+  <input id="msg" placeholder="ข้อความ">
+  <input id="ig" placeholder="@ig">
+  <button onclick="send()">ส่ง</button>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC4aqYP4YFPkaXE6039rnS6kgyDklt5ujA",
+      authDomain: "test-706cb.firebaseapp.com",
+      databaseURL: "https://test-706cb-default-rtdb.firebaseio.com",
+      projectId: "test-706cb",
+      storageBucket: "test-706cb.appspot.com",
+      messagingSenderId: "897043689098",
+      appId: "1:897043689098:web:b6d6d629d2ae72150b0773"
+    };
+
+    // init firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // ส่งข้อมูลเข้า DB
+    window.send = function () {
+      set(ref(db, "screen"), {
+        message: document.getElementById("msg").value,
+        ig: document.getElementById("ig").value,
+        time: Date.now()
+      })
+      .then(() => console.log("เขียนเข้า DB สำเร็จ 🔥"))
+      .catch(err => console.error("พัง:", err));
+    };
+  </script>
+
+</body>
+</html>
