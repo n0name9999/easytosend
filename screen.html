@@ -1,56 +1,55 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>Screen</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Screen</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <style>
-    body {
-      margin: 0;
-      background: black;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      font-family: sans-serif;
-      padding:16px;
-    }
+<style>
+body {
+  margin: 0;
+  background: black;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: sans-serif;
+  padding: 16px;
+}
 
-    .box {
-      text-align: center;
-      animation: fade .4s ease;
-    }
+.box {
+  text-align: center;
+  animation: fade .4s ease;
+}
 
-    /* ✅ ภาพไม่โดนครอป */
-    img {
-      max-width: 65vw;
-      max-height: 65vh;
-      margin-top: 30px;
-      margin-bottom: -17px;
-      border-radius: 18px;
-      object-fit: contain; /* สำคัญ */
-      background: #000; /* กันขอบกินภาพ */
-    }
+img {
+  max-width: 65vw;
+  max-height: 65vh;
+  margin-top: 30px;
+  border-radius: 18px;
+  object-fit: contain; /* ขอบไม่กินภาพ */
+}
 
-    h1 {
-      font-size: 80px;
-      margin-bottom: -30px;
-    }
+h1 {
+  font-size: 80px;
+}
 
-    p {
-      font-size: 40px;
-      opacity: .8;
-    }
+p {
+  font-size: 40px;
+  opacity: .8;
+}
 
-    @keyframes fade {
-      from { opacity:0; transform:scale(.95); }
-      to { opacity:1; transform:scale(1); }
-    }
-  </style>
+@keyframes fade {
+  from { opacity:0; transform:scale(.95); }
+  to { opacity:1; transform:scale(1); }
+}
+</style>
 </head>
+
 <body>
+
+<div id="unlock">คลิกเพื่อเปิดเสียง</div>
 
 <div class="box" id="box">
   <img id="img" style="display:none">
@@ -58,54 +57,63 @@
   <p id="ig"></p>
 </div>
 
-<!-- 🔊 เสียงเอฟเฟกต์ -->
 <audio id="sound" src="pop.mp3" preload="auto"></audio>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyC4aqYP4YFPkaXE6039rnS6kgyDklt5ujA",
-    databaseURL: "https://test-706cb-default-rtdb.firebaseio.com",
-    projectId: "test-706cb",
-    appId: "1:897043689098:web:b6d6d629d2ae72150b0773"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyC4aqYP4YFPkaXE6039rnS6kgyDklt5ujA",
+  databaseURL: "https://test-706cb-default-rtdb.firebaseio.com",
+  projectId: "test-706cb",
+  appId: "1:897043689098:web:b6d6d629d2ae72150b0773"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-  const img = document.getElementById("img");
-  const msg = document.getElementById("msg");
-  const ig  = document.getElementById("ig");
-  const box = document.getElementById("box");
-  const sound = document.getElementById("sound");
+const img = document.getElementById("img");
+const msg = document.getElementById("msg");
+const ig = document.getElementById("ig");
+const box = document.getElementById("box");
+const sound = document.getElementById("sound");
+const unlock = document.getElementById("unlock");
 
-  let lastImage = ""; // กันเสียงดังซ้ำ
+let audioEnabled = false;
 
-  onValue(ref(db, "screen"), snap => {
-    const d = snap.val();
-    if (!d) return;
-
-    msg.innerText = d.message || "";
-    ig.innerText  = d.ig ? "IG: " + d.ig : "";
-
-    // ✅ ถ้ามีรูปใหม่
-    if (d.image && d.image !== lastImage) {
-      img.src = d.image;
-      img.style.display = "block";
-
-      sound.currentTime = 0;
-      sound.play().catch(()=>{});
-
-      lastImage = d.image;
-    }
-
-    // รีสตาร์ท animation
-    box.style.animation = "none";
-    box.offsetHeight;
-    box.style.animation = "fade .4s ease";
+/* ปลดล็อกเสียง */
+unlock.onclick = () => {
+  sound.play().then(() => {
+    sound.pause();
+    sound.currentTime = 0;
+    audioEnabled = true;
+    unlock.style.display = "none";
   });
+};
+
+/* Firebase listener */
+onValue(ref(db, "screen"), snap => {
+  const d = snap.val();
+  if (!d) return;
+
+  msg.innerText = d.message || "";
+  ig.innerText = d.ig ? "IG: " + d.ig : "";
+
+  if (d.image && img.src !== d.image) {
+    img.src = d.image;
+    img.style.display = "block";
+
+    if (audioEnabled) {
+      sound.currentTime = 0;
+      sound.play();
+    }
+  }
+
+  box.style.animation = "none";
+  box.offsetHeight;
+  box.style.animation = "fade .4s ease";
+});
 </script>
 
 </body>
