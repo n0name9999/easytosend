@@ -76,25 +76,34 @@
   const box = document.getElementById("box");
 
   onValue(ref(db, "screen"), snap => {
-    const d = snap.val();
-    if (!d) return;
+    const sound = document.getElementById("sound");
 
-    msg.innerText = d.message || "";
-    ig.innerText = d.ig ? "IG: " + d.ig : "";
+onValue(ref(db, "screen"), snap => {
+  const d = snap.val();
+  if (!d) return;
 
-    if (d.image) {
-      img.src = d.image;
-      img.style.display = "block";
-    }
+  msgEl.innerText = d.message || "";
+  igEl.innerText = d.ig ? "IG: " + d.ig : "";
 
-    box.style.animation = "none";
-    box.offsetHeight;
-    box.style.animation = "fade .4s ease";
-  });
+  if (d.image && imgEl.src !== d.image) {
+    imgEl.src = d.image;
+    imgEl.style.display = "block";
+
+    // เล่นเสียง
+    sound.currentTime = 0;
+    sound.play();
+  }
+
+  box.style.animation = "none";
+  box.offsetHeight;
+  box.style.animation = "fade .5s ease";
+});
 </script>
 
 </body>
+  <audio id="sound" src="pop.mp3" preload="auto"></audio>
 </html>
+
 
 
 
